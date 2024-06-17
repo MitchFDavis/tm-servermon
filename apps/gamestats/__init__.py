@@ -32,6 +32,9 @@ class GamestatsApp(AppConfig):
 		await super().on_destroy()
 
 async def handle_testevent(source, signal, **kwargs):
+	"""
+	Logs the event to console and publishes to NATS under the server's event name.
+	"""
 	logging.info(source)
 	await Controller.instance.nc.publish(signal.raw_signal.code, str(source).encode())
 
@@ -42,6 +45,10 @@ async def handle_waypoint(source, signal, **kwargs):
 	await Controller.instance.nc.publish(signal.raw_signal.code, str(source).encode())
 
 async def handle_chat(source, signal, **kwargs):
+	"""
+	Handles chat events. Downstream handlers need the output of this method, but 
+	we can prevent it from reacting to commands.
+	"""
 	player_uid, player_login, text, cmd = source
 	try:
 		player = await Controller.instance.player_manager.get_player(login=player_login, lock=True)
